@@ -3,7 +3,7 @@ from configuracion import *
 from clases import *
 from funciones import mostrar_texto, reiniciar_juego, pantalla_inicio
 from grupos import *
-from database import inicializar_db, guardar_puntuacion, obtener_top
+from database import inicializar_db, guardar_puntuacion, obtener_top, eliminar_datos, amigos_puntajes
 from fondo import FondoEstrellas
 from sonido import *
 from boss import Boss  
@@ -11,6 +11,9 @@ from boss import Boss
 
 inicializar_db()
 pygame.init()
+
+
+musica_de_fondo()
 
 
 nombre_jugador = pantalla_inicio(VENTANA)
@@ -31,6 +34,7 @@ boss_activo = None
 
 
 while True:
+    
     RELOJ.tick(FPS)
     teclas = pygame.key.get_pressed()
 
@@ -50,6 +54,7 @@ while True:
                 nombre_jugador = pantalla_inicio(VENTANA)
                 estado_juego = "juego"
                 nave = reiniciar_juego(todos, enemigos, balas, obstaculos, balas_enemigas, Nave)
+                musica_de_fondo()
                 puntuacion = 0
                 nivel = 1
                 tiempo_nivel = 0
@@ -57,9 +62,9 @@ while True:
 
    
     if estado_juego == "juego":
-       
+        
         if boss_activo is None:
-            tiempo_nivel += 100
+            tiempo_nivel += 1
             if tiempo_nivel % 1000 == 0:
                 nivel += 1
 
@@ -134,6 +139,7 @@ while True:
                     derrotado = boss_activo.recibir_dano(5)
                     puntuacion += 5
                     if derrotado:
+                        boss_derrotado.play()
                         boss_activo = None
                         nivel += 1
                         tiempo_nivel = 0
@@ -146,6 +152,7 @@ while True:
             or (boss_activo and pygame.sprite.collide_rect(nave, boss_activo))):
             explosion.play()
             estado_juego = "gameover"
+            detener_musica()
             guardar_puntuacion(nombre_jugador, puntuacion)
 
       
@@ -156,7 +163,7 @@ while True:
         if boss_activo:
             boss_activo.dibujar_barra_hp(VENTANA)
 
-        mostrar_texto(VENTANA, f"{nombre_jugador} | Puntos: {puntuacion} | Nivel: {nivel}", 24, BLANCO, 10, 10)
+        mostrar_texto(VENTANA, f"{nombre_jugador} | Puntos: {puntuacion} | Nivel: {nivel}", 18, BLANCO, 10, 10)
 
 
     elif estado_juego == "gameover":
